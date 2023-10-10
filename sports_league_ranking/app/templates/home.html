@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sports League Ranking</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Sports League Ranking</h1>
+    </header>
+
+    <nav>
+        <ul class="tabs">
+            <li><a href="{% url 'upload_csv' %}" class="{% if request.path == '/upload-csv/' %}active{% endif %}">Insert CSV</a></li>
+            <li><a href="{% url 'display_rankings' %}" class="{% if request.path == '/display-rankings/' %}active{% endif %}">Rankings Display</a></li>
+            <li><a href="{% url 'match_list' %}" class="{% if request.path == '/match-list/' %}active{% endif %}">Match List</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

@@ -1,8 +1,12 @@
 import csv
 from io import TextIOWrapper
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Team, Match
+from .models import Team, Match, HistoricalMatch
 from .forms import UploadCSVForm, EditMatchForm, AddMatchForm
+
+
+def home(request):
+    return render(request, 'home.html')
 
 def upload_csv(request):
     if request.method == 'POST':
@@ -24,6 +28,16 @@ def upload_csv(request):
                 )
                 match.update_team_points()
 
+                historical_match = HistoricalMatch.objects.create(
+                    historical_match=match,
+                    home_team=home_team.name,
+                    away_team=away_team.name,
+                    historical_home_score=match.home_score,
+                    historical_away_score=match.away_score
+                )
+                historical_match.save()
+
+
             return redirect('display_rankings')
     else:
         form = UploadCSVForm()
@@ -37,11 +51,9 @@ def add_match(request):
     if request.method == 'POST':
         form = AddMatchForm(request.POST)
         if form.is_valid():
-            # Create or retrieve home and away teams
             home_team, created = Team.objects.get_or_create(name=form.cleaned_data['home_team_name'])
             away_team, created = Team.objects.get_or_create(name=form.cleaned_data['away_team_name'])
             
-            # Create the match with the corresponding teams
             match = Match(
                 home_team=home_team,
                 away_team=away_team,
@@ -49,6 +61,15 @@ def add_match(request):
                 away_score=form.cleaned_data['away_score']
             )
             match.update_team_points()
+
+            historical_match = HistoricalMatch.objects.create(
+                historical_match=match,
+                home_team=home_team.name,
+                away_team=away_team.name,
+                historical_home_score=match.home_score,
+                historical_away_score=match.away_score
+            )
+            historical_match.save()
             return redirect('match_list')
     else:
         form = AddMatchForm()
@@ -60,7 +81,8 @@ def edit_match(request, match_id):
     if request.method == 'POST':
         form = EditMatchForm(request.POST, instance=match)
         if form.is_valid():
-            match.update_team_points()
+            historical_match = HistoricalMatch.objects.filter(historical_match=match)
+            match.update_team_points(historical_match)
             return redirect('match_list')
     else:
         form = EditMatchForm(instance=match)
@@ -73,5 +95,5 @@ def delete_match(request, match_id):
     return redirect('match_list')
 
 def match_list(request):
-    matches = Match.objects.all()  # Query the database to fetch all matches
+    matches = Match.objects.all()
     return render(request, 'match_list.html', {'matches': matches})
