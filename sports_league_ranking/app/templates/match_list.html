@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Match List</title>
+</head>
+<body>
+    <h1>Match List</h1>
+    <table>
+        <tr>
+            <th>Home Team</th>
+            <th></th>
+            <th>Away Team</th>
+        </tr>
+        {% for match in matches %}
+            <tr>
+                <td>{{ match.home_team }}</td>
+                <td>{{ match.home_score }} - {{ match.away_score }}</td>
+                <td>{{ match.away_team }}</td>
+                <td><a href="{% url 'edit_match' match.id %}">Edit</a></td>
+                <td>
+                    <button type="button" onclick="confirmDelete('{{ match.id }}')">Delete</button>
+                </td>
+             </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'add_match' %}">Add match</a>
+
+    <script>
+        function confirmDelete(matchId) {
+            if (confirm("Confirm delete?")) {
+                window.location.href = `{% url 'delete_match' 0 %}`.replace('0', matchId);
+            }
+        }
+    </script>
+</body>
+</html>
