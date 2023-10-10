@@ -1,5 +1,5 @@
 from django import forms
-from .models import Match
+from .models import Match, AppUser
 
 class UploadCSVForm(forms.Form):
     csv_file = forms.FileField()
@@ -16,3 +16,14 @@ class AddMatchForm(forms.ModelForm):
     class Meta:
         model = Match
         fields = ['home_team_name', 'home_score', 'away_team_name', 'away_score']
+
+class UserLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
+class UserCreationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = AppUser
+        fields = ('username', 'password')

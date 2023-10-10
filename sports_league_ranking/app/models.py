@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
@@ -88,3 +90,27 @@ class HistoricalMatch(models.Model):
 
     class Meta:
         app_label = 'app'
+
+class AppUserManager(BaseUserManager):
+    def create_user(self, username, password=None):
+        if not username:
+            raise ValueError('The Username field must be set')
+        user = self.model(username=username)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None):
+        user = self.create_user(username, password)
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+class AppUser(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField(unique=True, max_length=150)
+    objects = AppUserManager()
+
+    USERNAME_FIELD = 'username'
+
+    def __str__(self):
+        return self.username

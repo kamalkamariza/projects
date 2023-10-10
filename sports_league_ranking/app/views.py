@@ -1,13 +1,16 @@
 import csv
 from io import TextIOWrapper
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Team, Match, HistoricalMatch
-from .forms import UploadCSVForm, EditMatchForm, AddMatchForm
-
+from .models import Team, Match, HistoricalMatch, AppUser
+from .forms import UploadCSVForm, EditMatchForm, AddMatchForm, UserCreationForm, UserLoginForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'display_rankings.html')
 
+@login_required(login_url='login')
 def upload_csv(request):
     if request.method == 'POST':
         form = UploadCSVForm(request.POST, request.FILES)
@@ -47,6 +50,7 @@ def display_rankings(request):
     teams = Team.objects.order_by('-points', 'name')
     return render(request, 'display_rankings.html', {'teams': teams})
 
+@login_required(login_url='login')
 def add_match(request):
     if request.method == 'POST':
         form = AddMatchForm(request.POST)
@@ -76,6 +80,7 @@ def add_match(request):
     
     return render(request, 'add_match.html', {'form': form})
 
+@login_required(login_url='login')
 def edit_match(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
     if request.method == 'POST':
@@ -89,6 +94,7 @@ def edit_match(request, match_id):
     
     return render(request, 'edit_match.html', {'form': form, 'match': match})
 
+@login_required(login_url='login')
 def delete_match(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
     match.delete_match()
@@ -97,3 +103,33 @@ def delete_match(request, match_id):
 def match_list(request):
     matches = Match.objects.all()
     return render(request, 'match_list.html', {'matches': matches})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = UserLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = get_object_or_404(AppUser, username=username)
+            
+            if user is not None and password == user.password:
+                login(request, user)
+                return redirect('home')  # Redirect to the home page or any other page
+    else:
+        form = UserLoginForm()
+    return render(request, 'login.html', {'form': form})
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')  # Redirect to the home page or any other page
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')

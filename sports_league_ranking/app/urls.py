@@ -9,4 +9,7 @@ urlpatterns = [
     path('add-match/', views.add_match, name='add_match'),
     path('edit-match/<int:match_id>/', views.edit_match, name='edit_match'),
     path('delete-match/<int:match_id>/', views.delete_match, name='delete_match'),
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
 ]
