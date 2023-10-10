@@ -69,7 +69,6 @@ def edit_match(request, match_id):
 
 def delete_match(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
-    print(match, request.method)
     match.delete_match()
     return redirect('match_list')
 
